@@ -1367,9 +1367,6 @@ class Optimizer:
                 # Never preempt overridden
                 if app.override_active:
                     continue
-                # Never preempt grid-supplemented
-                if "grid supplement" in decision.reason.lower():
-                    continue
                 # Never preempt dependency-protected (has dependents that are ON)
                 if app.id in self._reverse_deps:
                     has_running_dep = any(
@@ -1504,7 +1501,6 @@ class Optimizer:
         Shedding rules:
         - Never shed on_only appliances
         - Never shed manually overridden appliances
-        - Never shed grid-supplemented appliances
         - Never shed bypasses_cooldown decisions (deadline must-run)
         - Never shed a dependency while any of its dependents are running
         - Reduce dynamic current before turning off
@@ -1543,9 +1539,6 @@ class Optimizer:
                 continue
             # Never shed deadline-forced or other cooldown-bypassing decisions
             if decision.bypasses_cooldown:
-                continue
-            # Skip grid-supplemented appliances (they consume from grid, not solar)
-            if "grid supplement" in decision.reason.lower():
                 continue
             # Never shed a dependency while any dependent is still running
             if appliance.id in self._reverse_deps:
