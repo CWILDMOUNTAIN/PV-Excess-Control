@@ -40,6 +40,16 @@ def _step_floor(value: float, step: float) -> float:
     """Round down to nearest multiple of step."""
     return math.floor(value / step) * step
 
+def _can_change_state(app: ApplianceConfig, state: ApplianceState | None) -> bool:
+    """Check if enough time has passed since last state change for this appliance."""
+    if getattr(app, "switch_interval", None) in (None, 0):
+        return True
+        
+    if state is None or state.last_state_change is None:
+        return True
+    
+    elapsed = (datetime.now() - state.last_state_change).total_seconds()
+    return elapsed >= app.switch_interval
 
 class Optimizer:
     """Pure-logic optimization engine.
@@ -1383,6 +1393,9 @@ class Optimizer:
                     and state is not None
                     and state.runtime_today < app.min_daily_runtime
                 ):
+                    continue
+                # Never preempt appliances still inside their minimum switch interval
+                if not _can_change_state(app, state):
                     continue
 
                 # Calculate freed power
