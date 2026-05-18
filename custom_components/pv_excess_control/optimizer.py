@@ -1386,9 +1386,11 @@ class Optimizer:
                 ):
                     continue
                 # Never preempt appliances with unmet switch interval
-                last = last_state_change.get(app.id)
+                state = state_by_id.get(app.id)
+                last = last_state_change.get(app.id) if last_state_change else None
                 if (
-                    last_state_change is not None
+                    state is not None
+                    and state.is_on
                     and last is not None
                     and app.switch_interval is not None
                     and (datetime.now() - last).total_seconds() < app.switch_interval
