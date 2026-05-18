@@ -1470,7 +1470,7 @@ class PvExcessCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             #     see 2026-04-09-helper-only-hardening-design.md Bug C).
             is_needed_by_others = decision.appliance_id in self._needed_by_others
             if not decision.bypasses_cooldown and not is_needed_by_others:
-                if decision.action != Action.SET_CURRENT or not is_on:
+                if decision.action == Action.OFF:
                     last_change = self._last_state_change.get(decision.appliance_id)
                     if last_change is not None:
                         elapsed = (datetime.now() - last_change).total_seconds()
