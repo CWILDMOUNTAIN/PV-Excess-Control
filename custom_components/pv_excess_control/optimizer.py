@@ -221,7 +221,7 @@ class Optimizer:
         if self.enable_preemption:
             avg_budget, instant_budget = self._preempt(
                 decisions, sorted_appliances, state_by_id,
-                avg_budget, instant_budget,
+                avg_budget, instant_budget, last_state_change,
             )
 
         # Phase 3: SHED — reads the instantaneous budget (physical reality).
@@ -1274,6 +1274,7 @@ class Optimizer:
         state_by_id: dict[str, ApplianceState],
         avg_budget: float,
         instant_budget: float,
+        last_state_change,
     ) -> tuple[float, float]:
         """Phase 2.5: PREEMPT - shed lower-priority appliances to start higher-priority ones.
 
@@ -1385,15 +1386,14 @@ class Optimizer:
                 ):
                     continue
                 # Never preempt appliances with unmet switch interval
-                if last_state_change is not None:
-                    last = last_state_change.get(app.id)
-                    if (
-                        app.switch_interval is not None)
-                        and last is not None
-                        and (datetime.now() - last).total_seconds() < app.switch_interval
-                    ):
-                        continue
-                    
+                last = last_state_change.get(app.id)
+                if (
+                    last_state_change is not None
+                    and last is not None
+                    and app.switch_interval is not None
+                    and (datetime.now() - last).total_seconds() < app.switch_interval
+                ):
+                    continue
 
                 # Calculate freed power
                 freed = (
