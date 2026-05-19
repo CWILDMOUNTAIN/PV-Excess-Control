@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import logging
 import math
-from datetime import time
+from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 from custom_components.pv_excess_control.const import (
